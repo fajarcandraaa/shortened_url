@@ -91,5 +91,20 @@ func (r *ShortenedUrlRepository) UpdateLatency(ctx context.Context, shortUrl str
 
 // GetUrl implements ShortenedUrlRepositoryContract.
 func (r *ShortenedUrlRepository) GetUrl(ctx context.Context, metapayload presentation.MetaPagination) ([]entity.Url, int64, error) {
-	panic("unimplemented")
+	var (
+		count int64
+		urls = make([]entity.Url, 0)
+
+		offset = (metapayload.Page - 1) * metapayload.PerPage
+		order  = metapayload.OrderBy + " " + metapayload.SortBy
+		model  = r.db.Model(&entity.Url{})
+	)
+
+	if err := model.Order(order).Limit(metapayload.PerPage).Offset(offset).Find(&urls).Error; err != nil {
+		return nil, 0, err
+	}
+
+	_ = model.Count(&count)
+
+	return urls, count, nil
 }

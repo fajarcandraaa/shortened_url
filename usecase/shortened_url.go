@@ -6,9 +6,11 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"strconv"
 	"time"
 
 	"github.com/fajarcandraaa/shortened_url/helpers"
+	"github.com/fajarcandraaa/shortened_url/internal/dto"
 	"github.com/fajarcandraaa/shortened_url/internal/entity"
 	"github.com/fajarcandraaa/shortened_url/internal/presentation"
 	"github.com/fajarcandraaa/shortened_url/internal/service"
@@ -85,4 +87,53 @@ func (u *ShortenedUrlUseCase) RedirectUrl(w http.ResponseWriter, r *http.Request
 			return
 		}
 	}
+}
+
+func (u *ShortenedUrlUseCase) UrlShortList(w http.ResponseWriter, r *http.Request) {
+	var (
+		responder    = helpers.NewHTTPResponse("listUrl")
+		ctx          = context.Background()
+		param        = r.URL.Query()
+		paramSortBy  = param.Get("sortby")
+		paramOrderBy = param.Get("orderby")
+		paramPerPage = param.Get("perpage")
+		paramPage    = param.Get("page")
+	)
+
+	paginationParam, err := helpers.SetDefaultPginationParam(paramPage, paramPerPage, paramOrderBy, paramSortBy)
+	if err != nil {
+		responder.FieldErrors(w, err, http.StatusUnprocessableEntity, "value of query parameters has diferent type")
+		return
+	}
+
+	sortBy := paginationParam.SortBy
+	orderBy := paginationParam.OrderBy
+	perPage := paginationParam.PerPage
+	page, _ := strconv.Atoi(paginationParam.Page)
+
+	payload := dto.RequestParamToMeta(sortBy, orderBy, int(perPage), page)
+
+	urlData, total, err := u.service.ShortenedUrlService.ListUrl(ctx, payload)
+	if err != nil {
+		responder.ErrorJSON(w, http.StatusNotFound, err.Error())
+		return
+	}
+
+	pagination, err := helpers.GetPagination(helpers.PaginationParams{
+		Path:        "list.items",
+		Page:        strconv.Itoa(page),
+		TotalRows:   int32(total),
+		PerPage:     int32(perPage),
+		OrderBy:     orderBy,
+		SortBy:      sortBy,
+		CurrentPage: int32(page),
+	})
+	if err != nil {
+		responder.ErrorJSON(w, http.StatusConflict, "error pagination")
+		return
+	}
+
+	urlData.Status = "OK"
+	responder.SuccessWithMeta(w, urlData, pagination, http.StatusOK, "short url list")
+	return
 }

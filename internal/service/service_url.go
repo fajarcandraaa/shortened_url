@@ -56,7 +56,7 @@ func (s *shortenedUrlService) ShortenedRedirect(ctx context.Context, shortUrl st
 	if exp {
 		return entity.ErrExpiredTime
 	}
-	
+
 	err = s.repo.ShortUrlRepo.UpdateClick(ctx, shortUrl)
 	if err != nil {
 		return err
@@ -75,6 +75,12 @@ func (s *shortenedUrlService) ShortenedRedirect(ctx context.Context, shortUrl st
 }
 
 // ListUrl implements ShortenedUrlContract.
-func (s *shortenedUrlService) ListUrl(ctx context.Context, sortBy string, orderBy string, perPage int, page int) (*presentation.Response, error) {
-	panic("unimplemented")
+func (s *shortenedUrlService) ListUrl(ctx context.Context, metapayload presentation.MetaPagination) (*presentation.Response, int64, error) {
+	urlList, total, err := s.repo.ShortUrlRepo.GetUrl(ctx, metapayload)
+	if err != nil {
+		return nil, 0, err
+	}
+
+	resp := dto.ArrayUrlToResponse(urlList)
+	return &resp, total, nil
 }

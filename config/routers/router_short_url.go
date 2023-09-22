@@ -12,4 +12,6 @@ func shortUrlRoute(se *Serve, s *service.Service) {
 
 	se.Router.HandleFunc("/urlshort", shortUrlUseCase.GenerateShortUrl).Methods("POST")
 	se.Router.HandleFunc("/{shorturl}", shortUrlUseCase.RedirectUrl).Methods("GET")
+	se.Router.HandleFunc("/urlshort/list", shortUrlUseCase.UrlShortList).Methods("GET")
+
 }

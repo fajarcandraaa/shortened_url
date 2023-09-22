@@ -11,14 +11,6 @@ func ToResponse(status string, data interface{}) presentation.Response {
 	return res
 }
 
-func ArrayToResponse(items []interface{}) presentation.Response {
-	resp := presentation.Response{
-		Data: items,
-	}
-
-	return resp
-}
-
 func RequestParamToMeta(sortBy, orderBy string, perPage, page int) presentation.MetaPagination {
 	resp := presentation.MetaPagination{
 		SortBy:  sortBy,

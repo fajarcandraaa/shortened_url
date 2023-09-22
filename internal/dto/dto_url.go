@@ -39,3 +39,11 @@ func RequestPayloadToDatabase(p presentation.ShortenedRequest, urlShortened stri
 
 	return resp
 }
+
+func ArrayUrlToResponse(items []entity.Url) presentation.Response {
+	resp := presentation.Response{
+		Data: items,
+	}
+
+	return resp
+}
