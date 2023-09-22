@@ -9,10 +9,12 @@ import (
 	"time"
 
 	"github.com/fajarcandraaa/shortened_url/helpers"
+	"github.com/fajarcandraaa/shortened_url/internal/entity"
 	"github.com/fajarcandraaa/shortened_url/internal/presentation"
 	"github.com/fajarcandraaa/shortened_url/internal/service"
 	validation "github.com/go-ozzo/ozzo-validation/v4"
 	"github.com/gorilla/mux"
+	"github.com/pkg/errors"
 )
 
 type ShortenedUrlUseCase struct {
@@ -73,7 +75,14 @@ func (u *ShortenedUrlUseCase) RedirectUrl(w http.ResponseWriter, r *http.Request
 
 	err := u.service.ShortenedUrlService.ShortenedRedirect(ctx, shortUrl, startTime, w, r)
 	if err != nil {
-		responder.ErrorWithStatusCode(w, http.StatusNotFound, fmt.Sprint(err))
-		return
+		causer := errors.Cause(err)
+		switch causer {
+		case entity.ErrExpiredTime:
+			responder.ErrorWithStatusCode(w, http.StatusGone, fmt.Sprint(err))
+			return
+		default:
+			responder.ErrorWithStatusCode(w, http.StatusNotFound, fmt.Sprint(err))
+			return
+		}
 	}
 }

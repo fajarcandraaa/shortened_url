@@ -10,6 +10,7 @@ import (
 
 	"github.com/fajarcandraaa/shortened_url/helpers"
 	"github.com/fajarcandraaa/shortened_url/internal/dto"
+	"github.com/fajarcandraaa/shortened_url/internal/entity"
 	"github.com/fajarcandraaa/shortened_url/internal/presentation"
 	"github.com/fajarcandraaa/shortened_url/internal/repositories"
 )
@@ -45,11 +46,17 @@ func (s *shortenedUrlService) NewShortenedUrl(ctx context.Context, payload prese
 
 // GetLatency implements ShortenedUrlContract.
 func (s *shortenedUrlService) ShortenedRedirect(ctx context.Context, shortUrl string, startTime time.Time, w http.ResponseWriter, r *http.Request) error {
+	timenow := time.Now()
 	urlDetail, err := s.repo.ShortUrlRepo.FindUrl(ctx, shortUrl)
 	if err != nil {
 		return err
 	}
 
+	exp := timenow.After(urlDetail.ExpireTime)
+	if exp {
+		return entity.ErrExpiredTime
+	}
+	
 	err = s.repo.ShortUrlRepo.UpdateClick(ctx, shortUrl)
 	if err != nil {
 		return err
