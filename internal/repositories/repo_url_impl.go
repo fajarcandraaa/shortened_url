@@ -45,16 +45,51 @@ func (r *ShortenedUrlRepository) InsertUrl(ctx context.Context, payload entity.U
 }
 
 // FindUrl implements ShortenedUrlRepositoryContract.
-func (r *ShortenedUrlRepository) FindUrl(ctx context.Context, urlId string) (*entity.Url, error) {
-	panic("unimplemented")
+func (r *ShortenedUrlRepository) FindUrl(ctx context.Context, shorUrl string) (*entity.Url, error) {
+	var (
+		url entity.Url
+	)
+
+	err := r.db.First(&url, "shortened_url = ?", shorUrl).Error
+	if err != nil {
+		return nil, err
+	}
+	return &url, nil
+}
+
+// UpdateClick implements ShortenedUrlRepositoryContract.
+func (r *ShortenedUrlRepository) UpdateClick(ctx context.Context, shortUrl string) error {
+	var (
+		query = `
+			UPDATE urls SET url_clicks = url_clicks + 1 WHERE shortened_url = $1
+		`
+	)
+
+	err := r.db.Exec(query, shortUrl).Error
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// UpdateLatency implements ShortenedUrlRepositoryContract.
+func (r *ShortenedUrlRepository) UpdateLatency(ctx context.Context, shortUrl string, latency int) error {
+	var (
+		query = `
+			UPDATE urls SET url_latency = $1 WHERE shortened_url = $2
+		`
+	)
+
+	err := r.db.Exec(query, latency, shortUrl).Error
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 // GetUrl implements ShortenedUrlRepositoryContract.
 func (r *ShortenedUrlRepository) GetUrl(ctx context.Context, metapayload presentation.MetaPagination) ([]entity.Url, int64, error) {
-	panic("unimplemented")
-}
-
-// UpdateLatency implements ShortenedUrlRepositoryContract.
-func (r *ShortenedUrlRepository) UpdateLatency(ctx context.Context, urlId string, latency int) error {
 	panic("unimplemented")
 }

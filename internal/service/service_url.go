@@ -3,7 +3,10 @@ package service
 import (
 	"context"
 	"fmt"
+	"log"
 	"math/rand"
+	"net/http"
+	"time"
 
 	"github.com/fajarcandraaa/shortened_url/helpers"
 	"github.com/fajarcandraaa/shortened_url/internal/dto"
@@ -27,8 +30,6 @@ func (s *shortenedUrlService) NewShortenedUrl(ctx context.Context, payload prese
 	payload.URL = urls
 	urlShort := helpers.Base62Encode(rand.Uint64())
 
-	// shortKey := helpers.GenerateShortKey()
-
 	repoPayload := dto.RequestPayloadToDatabase(payload, urlShort)
 	err := s.repo.ShortUrlRepo.InsertUrl(ctx, repoPayload)
 	if err != nil {
@@ -40,17 +41,30 @@ func (s *shortenedUrlService) NewShortenedUrl(ctx context.Context, payload prese
 
 	dtoResp := dto.ToResponse("OK", shortenedUrl)
 	return &dtoResp, nil
-
-}
-
-// DetailUrl implements ShortenedUrlContract.
-func (s *shortenedUrlService) DetailUrl(ctx context.Context, urlID string) (*presentation.Response, error) {
-	panic("unimplemented")
 }
 
 // GetLatency implements ShortenedUrlContract.
-func (s *shortenedUrlService) GetLatency(ctx context.Context, urlId string, latency int) error {
-	panic("unimplemented")
+func (s *shortenedUrlService) ShortenedRedirect(ctx context.Context, shortUrl string, startTime time.Time, w http.ResponseWriter, r *http.Request) error {
+	urlDetail, err := s.repo.ShortUrlRepo.FindUrl(ctx, shortUrl)
+	if err != nil {
+		return err
+	}
+
+	err = s.repo.ShortUrlRepo.UpdateClick(ctx, shortUrl)
+	if err != nil {
+		return err
+	}
+
+	http.Redirect(w, r, urlDetail.TargetURL, http.StatusFound)
+	go func() {
+		latency := time.Since(startTime) / time.Millisecond
+		err := s.repo.ShortUrlRepo.UpdateLatency(ctx, shortUrl, int(latency))
+		if err != nil {
+			log.Fatalf("latency error")
+		}
+	}()
+
+	return nil
 }
 
 // ListUrl implements ShortenedUrlContract.

@@ -28,9 +28,10 @@ type (
 	}
 
 	ShortenedListDetailResponse struct {
-		UrlID        string `json:"url_id"`
-		ShortenedURL string `json:"shortened_url"`
-		TargetUrl    string `json:"target_url"`
-		Latency      int    `json:"url_latency"`
+		ShortenedURL string    `json:"shortened_url"`
+		TargetUrl    string    `json:"target_url"`
+		Clicks       int       `json:"url_click"`
+		Latency      int       `json:"url_latency"`
+		ExpireTime   time.Time `json:"expire_time"`
 	}
 )

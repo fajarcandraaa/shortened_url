@@ -6,11 +6,13 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"time"
 
 	"github.com/fajarcandraaa/shortened_url/helpers"
 	"github.com/fajarcandraaa/shortened_url/internal/presentation"
 	"github.com/fajarcandraaa/shortened_url/internal/service"
 	validation "github.com/go-ozzo/ozzo-validation/v4"
+	"github.com/gorilla/mux"
 )
 
 type ShortenedUrlUseCase struct {
@@ -23,9 +25,10 @@ func NewShortenedUrlUseCase(service *service.Service) *ShortenedUrlUseCase {
 	}
 }
 
+// GenerateShortUrl is function to generate short url
 func (u *ShortenedUrlUseCase) GenerateShortUrl(w http.ResponseWriter, r *http.Request) {
 	var (
-		responder = helpers.NewHTTPResponse("insertNewItem")
+		responder = helpers.NewHTTPResponse("generateShortenedUrl")
 		ctx       = context.Background()
 		payload   presentation.ShortenedRequest
 	)
@@ -57,4 +60,20 @@ func (u *ShortenedUrlUseCase) GenerateShortUrl(w http.ResponseWriter, r *http.Re
 
 	responder.SuccessJSON(w, resp, http.StatusCreated, "generate new shortened url success")
 	return
+}
+
+func (u *ShortenedUrlUseCase) RedirectUrl(w http.ResponseWriter, r *http.Request) {
+	var (
+		responder = helpers.NewHTTPResponse("redirectUrl")
+		ctx       = context.Background()
+		shortUrl  = mux.Vars(r)["shorturl"]
+	)
+
+	startTime := time.Now()
+
+	err := u.service.ShortenedUrlService.ShortenedRedirect(ctx, shortUrl, startTime, w, r)
+	if err != nil {
+		responder.ErrorWithStatusCode(w, http.StatusNotFound, fmt.Sprint(err))
+		return
+	}
 }

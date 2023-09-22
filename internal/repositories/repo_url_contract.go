@@ -9,7 +9,8 @@ import (
 
 type ShortenedUrlRepositoryContract interface {
 	InsertUrl(ctx context.Context, payload entity.Url) error
-	FindUrl(ctx context.Context, urlId string) (*entity.Url, error)
 	GetUrl(ctx context.Context, metapayload presentation.MetaPagination) ([]entity.Url, int64, error)
-	UpdateLatency(ctx context.Context, urlId string, latency int) error
+	FindUrl(ctx context.Context, shorUrl string) (*entity.Url, error)
+	UpdateClick(ctx context.Context, shortUrl string) error
+	UpdateLatency(ctx context.Context, shortUrl string, latency int) error
 }

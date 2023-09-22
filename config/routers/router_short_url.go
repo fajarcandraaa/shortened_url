@@ -5,10 +5,11 @@ import (
 	"github.com/fajarcandraaa/shortened_url/usecase"
 )
 
-func shortUrlRoute(p *PathPrefix, s *service.Service) {
+func shortUrlRoute(se *Serve, s *service.Service) {
 	var (
 		shortUrlUseCase = usecase.NewShortenedUrlUseCase(s)
 	)
 
-	p.ShortUrl.HandleFunc("", shortUrlUseCase.GenerateShortUrl).Methods("POST")
+	se.Router.HandleFunc("/urlshort", shortUrlUseCase.GenerateShortUrl).Methods("POST")
+	se.Router.HandleFunc("/{shorturl}", shortUrlUseCase.RedirectUrl).Methods("GET")
 }
