@@ -2,6 +2,7 @@ package helpers
 
 import (
 	"errors"
+	"fmt"
 	"math"
 	"math/rand"
 	"strings"
@@ -64,11 +65,14 @@ func Base62Decode(encodedString string) (uint64, error) {
 	return number, nil
 }
 
-func EnforceHTTP(url string) string {
-	if url[:4] != "http" {
-		return "http://" + url
+func EnforceHTTP(url string) (string, error) {
+	if url == "" {
+		return "", fmt.Errorf("this is not url")
 	}
-	return url
+	if url[:4] != "http" {
+		return "http://" + url, nil
+	}
+	return url, nil
 }
 
 func GenerateShortKey() string {
