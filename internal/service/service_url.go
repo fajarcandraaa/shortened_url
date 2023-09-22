@@ -27,12 +27,15 @@ func NewUrlShortenedUrlService(repo *repositories.Repository) *shortenedUrlServi
 
 // NewShortenedUrl implements ShortenedUrlContract.
 func (s *shortenedUrlService) NewShortenedUrl(ctx context.Context, payload presentation.ShortenedRequest) (*presentation.Response, error) {
-	urls := helpers.EnforceHTTP(payload.URL)
+	urls, err := helpers.EnforceHTTP(payload.URL)
+	if err != nil {
+		return nil, err
+	}
 	payload.URL = urls
 	urlShort := helpers.Base62Encode(rand.Uint64())
 
 	repoPayload := dto.RequestPayloadToDatabase(payload, urlShort)
-	err := s.repo.ShortUrlRepo.InsertUrl(ctx, repoPayload)
+	err = s.repo.ShortUrlRepo.InsertUrl(ctx, repoPayload)
 	if err != nil {
 		return nil, err
 	}
