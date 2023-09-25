@@ -32,7 +32,7 @@ And for additional information, i'm alredy setup unit-testing, just run `make te
 Here is more information on the process flow and API Contract documentation:
 
 * [Design system](https://docs.google.com/document/d/1PJ8AfhajSWCDgJUYy2092ffP2mMWHwsBfnMpVwGOE9c/edit?usp=sharing)
-* [API Documentation](https://drive.google.com/file/d/16nHGTpBsAy9KnfSuRmBiT8LD6_nx_RPZ/view?usp=sharing)
+* [API Documentation](https://drive.google.com/file/d/1XeyXzBdDUOTNr0s_Tv283F80RnbPi6Ss/view?usp=sharing)
 
 ## Afterword
 Hopefully, it can be easily understood and useful. Thank you~
